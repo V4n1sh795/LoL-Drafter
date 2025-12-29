@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Драфтер LoL</title>
+    <script>
+        function getUserUID() {
+            let uid = localStorage.getItem('user_uid');
+            if (!uid) {
+                // Генерируем UUID v4 (простой способ)
+                uid = 'user_' + ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+                ).substring(0, 8);
+                localStorage.setItem('user_uid', uid);
+            }
+            return uid;
+        }
+
+        // Устанавливаем глобально
+        window.USER_UID = getUserUID();
+        console.log('Ваш UID:', window.USER_UID);
+    </script>
+</head>
+<body>
+    <div>
+        <a href="/create/" class="btn">Создать комнату</a>
+    </div>
+
+    <!-- Стили для кнопки (опционально) -->
+    <style>
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #55acee;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background: #3b8bd8;
+        }
+    </style>
+</body>
+</html>

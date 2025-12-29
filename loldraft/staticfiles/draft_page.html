@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Выбор стороны</title>
+</head>
+<body>
+
+<div id="sideSelection">
+    <button onclick="joinSide('blue')">Синяя сторона</button>
+    <button onclick="joinSide('red')">Красная сторона</button>
+</div>
+
+<script>
+
+
+// Функция присоединения к стороне
+async function joinSide(side) {
+    const userUID = localStorage.getItem("user_uid");
+    const roomID = window.location.pathname.split('/')[2]; // из /room/abc123/
+
+    try {
+        const response = await fetch(`/room/${roomID}/join/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ side: side, user_uid: userUID })
+        });
+
+        if (response.ok) {
+            // Успешно — скрываем кнопки
+            document.getElementById('sideSelection').style.display = 'none';
+            // Можно показать сообщение или обновить состояние
+            console.log(`Присоединились к стороне: ${side}`);
+        } else {
+            const error = await response.json();
+            alert('Ошибка: ' + (error.error || 'Не удалось присоединиться'));
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Ошибка сети. Проверьте подключение.');
+    }
+}
+
+// Вспомогательная функция для CSRF (если используешь POST)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+let roomID = window.location.pathname.split('/')[2]; // из /room/abc123/
+
+async function checkRoomStatus() {
+    try {
+        const response = await fetch(`/room/${roomID}/status/`);
+        const data = await response.json();
+        console.log(data)
+        if (data.ready) {
+            console.log("Оба капитана присоединились! Переключаемся на драфт...");
+            // Вариант 1: перезагрузить страницу (она сама отрендерит index.html)
+            window.location.reload();
+
+            // Вариант 2: перейти на SPA напрямую (если index.html — React)
+            // window.location.href = window.location.href; // то же самое
+        } else {
+            // Повторяем опрос через 1.5 секунды
+            setTimeout(checkRoomStatus, 1500);
+        }
+    } catch (error) {
+        console.error("Ошибка при проверке статуса:", error);
+        // Повторяем даже при ошибке
+        setTimeout(checkRoomStatus, 2000);
+    }
+}
+
+// Запускаем опрос сразу при загрузке страницы
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Начинаем опрос статуса комнаты...");
+    checkRoomStatus();
+});
+</script>
+</body>
+</html>
