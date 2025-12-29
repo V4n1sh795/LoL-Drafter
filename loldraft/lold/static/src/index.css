@@ -2,30 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Очищаем все старые стили которые могли блокировать скролл */
+/* Нормальный скролл для всей страницы */
 html, body, #root {
   height: auto;
   min-height: 100vh;
-  overflow: visible !important;
+  overflow: visible;
   margin: 0;
   padding: 0;
 }
 
 body {
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-#root {
-  display: block;
+/* Стили для кастомного скролла в окне чемпионов */
+.scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #1f2937;
 }
 
-/* Убираем все возможные ограничения */
-* {
-  max-height: none !important;
+.scroll-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-/* Гарантируем что основной контент может расти */
-main, .main-content {
-  flex: 1;
+.scroll-container::-webkit-scrollbar-track {
+  background: #1f2937;
+  border-radius: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Отдельный скролл для окна чемпионов */
+.champions-scroll-container {
+  -webkit-overflow-scrolling: touch;
+  will-change: transform;
+  overscroll-behavior: contain; /* Предотвращает скролл страницы когда достигаем границ */
+}
+
+/* Гарантируем что контент чемпионов не выходит за границы */
+.champions-scroll-container > div {
+  min-height: min-content;
 }

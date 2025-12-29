@@ -198,8 +198,8 @@ function App() {
     e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMjQiIGZpbGw9IiMxRjJBM0UiLz4KPHBhdGggZD0iTTI0IDE2QzI3LjMxMzcgMTYgMzAgMTMuMzEzNyAzMCAxMEMzMC42LjY4NjI5IDI3LjMxMzcgNCAyNCA0QzIwLjY4NjMgNCAxOCA2LjY4NjI5IDE4IDEwQzE4IDEzLjMlN0NSMTIyMC42ODYzIDE2IDI0IDE2Wk0yNCAyMEMxOS41OCAyMCAxNiAyMS43OSAxNiAyNFYyOEgzMlYyNEMzMiAyMS43OSAyOC40MiAyMCAyNCAyMFoiIGZpbGw9IiM2NDc0OEIiLz4KPC9zdmc+Cg=='
   }
   
-  // Показываем только первые 100 чемпионов для компактного отображения
-  const displayedChampions = filteredChampions.slice(0, 100)
+  // ПОКАЗЫВАЕМ ВСЕХ ЧЕМПИОНОВ
+  const displayedChampions = filteredChampions
   
   return (
     <div className="min-h-screen bg-gray-950 text-gray-400">
@@ -528,7 +528,7 @@ function App() {
 
             {/* Центральная часть */}
             <div className="flex-1 mx-0 lg:mx-2">
-              {/* Окно выбора чемпионов - КОМПАКТНОЕ */}
+              {/* Окно выбора чемпионов - с ОТДЕЛЬНЫМ скроллом */}
               <div className="bg-gray-900 border border-gray-800 rounded-lg">
                 <div className="p-3 border-b border-gray-800">
                   <div className="flex flex-col md:flex-row justify-between items-center gap-3">
@@ -583,84 +583,89 @@ function App() {
                   </div>
                 </div>
                 
-                {/* КОМПАКТНАЯ СЕТКА ЧЕМПИОНОВ - только 100 штук */}
-                <div className="p-2">
-                  {loading ? (
-                    <div className="flex items-center justify-center py-6">
-                      <div className="text-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
-                        <p className="mt-2 text-gray-500 text-sm">Загрузка чемпионов...</p>
-                      </div>
-                    </div>
-                  ) : error ? (
-                    <div className="flex items-center justify-center py-6">
-                      <div className="text-center">
-                        <p className="text-red-400 text-sm">{error}</p>
-                        <p className="mt-2 text-gray-500 text-sm">Используется локальная база чемпионов</p>
-                      </div>
-                    </div>
-                  ) : displayedChampions.length === 0 ? (
-                    <div className="flex items-center justify-center py-6">
-                      <div className="text-center">
-                        <p className="text-gray-500">Чемпионы не найдены</p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Попробуйте изменить поисковый запрос или сбросить фильтр по роли
-                        </p>
-                        {selectedRole && (
-                          <button
-                            onClick={resetRoleFilter}
-                            className="mt-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs"
-                          >
-                            Сбросить фильтр по роли
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-8 lg:grid-cols-10 gap-1">
-                      {displayedChampions.map((champ) => (
-                        <div 
-                          key={champ.id}
-                          onClick={() => selectChampion(champ)}
-                          className={`cursor-pointer transition-all duration-150 ${
-                            selectedChampion?.id === champ.id 
-                              ? 'ring-1 ring-blue-500 ring-opacity-50' 
-                              : 'hover:ring-1 hover:ring-gray-600'
-                          }`}
-                        >
-                          <div className={`aspect-square rounded-lg flex flex-col items-center justify-center p-0.5 overflow-hidden ${
-                            selectedChampion?.id === champ.id 
-                              ? 'bg-blue-800/20 border-blue-500/50' 
-                              : 'bg-gray-800 border border-gray-700 hover:bg-gray-700'
-                          }`}>
-                            <img 
-                              src={champ.icon} 
-                              alt={champ.russianName}
-                              className="w-full h-full object-cover rounded"
-                              onError={handleImageError}
-                              loading="lazy"
-                            />
-                          </div>
-                          <div className="mt-0.5 text-center">
-                            <div className={`text-[8px] truncate font-medium ${
-                              selectedChampion?.id === champ.id 
-                                ? 'text-blue-300' 
-                                : 'text-gray-300'
-                            }`}>
-                              {champ.russianName}
-                            </div>
-                            <div className={`text-[6px] mt-0.5 ${
-                              selectedChampion?.id === champ.id 
-                                ? 'text-blue-400' 
-                                : 'text-gray-500'
-                            }`}>
-                              {(champ.tags || []).map(tag => getLocalizedRole(tag)).join(', ') || 'Неизвестно'}
-                            </div>
-                          </div>
+                {/* ОТДЕЛЬНОЕ СКРОЛЛИРУЕМОЕ ОКНО для чемпионов */}
+                <div className="p-2" style={{ height: '500px' }}>
+                  <div 
+                    ref={championsContainerRef}
+                    className="h-full overflow-y-auto scroll-container champions-scroll-container"
+                  >
+                    {loading ? (
+                      <div className="flex items-center justify-center py-6 h-full">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                          <p className="mt-2 text-gray-500 text-sm">Загрузка чемпионов...</p>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    ) : error ? (
+                      <div className="flex items-center justify-center py-6 h-full">
+                        <div className="text-center">
+                          <p className="text-red-400 text-sm">{error}</p>
+                          <p className="mt-2 text-gray-500 text-sm">Используется локальная база чемпионов</p>
+                        </div>
+                      </div>
+                    ) : displayedChampions.length === 0 ? (
+                      <div className="flex items-center justify-center py-6 h-full">
+                        <div className="text-center">
+                          <p className="text-gray-500">Чемпионы не найдены</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Попробуйте изменить поисковый запрос или сбросить фильтр по роли
+                          </p>
+                          {selectedRole && (
+                            <button
+                              onClick={resetRoleFilter}
+                              className="mt-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs"
+                            >
+                              Сбросить фильтр по роли
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-1 p-1">
+                        {displayedChampions.map((champ) => (
+                          <div 
+                            key={champ.id}
+                            onClick={() => selectChampion(champ)}
+                            className={`cursor-pointer transition-all duration-150 ${
+                              selectedChampion?.id === champ.id 
+                                ? 'ring-1 ring-blue-500 ring-opacity-50' 
+                                : 'hover:ring-1 hover:ring-gray-600'
+                            }`}
+                          >
+                            <div className={`aspect-square rounded-lg flex flex-col items-center justify-center p-0.5 overflow-hidden ${
+                              selectedChampion?.id === champ.id 
+                                ? 'bg-blue-800/20 border-blue-500/50' 
+                                : 'bg-gray-800 border border-gray-700 hover:bg-gray-700'
+                            }`}>
+                              <img 
+                                src={champ.icon} 
+                                alt={champ.russianName}
+                                className="w-full h-full object-cover rounded"
+                                onError={handleImageError}
+                                loading="lazy"
+                              />
+                            </div>
+                            <div className="mt-0.5 text-center">
+                              <div className={`text-[8px] truncate font-medium ${
+                                selectedChampion?.id === champ.id 
+                                  ? 'text-blue-300' 
+                                  : 'text-gray-300'
+                              }`}>
+                                {champ.russianName}
+                              </div>
+                              <div className={`text-[6px] mt-0.5 ${
+                                selectedChampion?.id === champ.id 
+                                  ? 'text-blue-400' 
+                                  : 'text-gray-500'
+                              }`}>
+                                {(champ.tags || []).map(tag => getLocalizedRole(tag)).join(', ') || 'Неизвестно'}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="p-2 border-t border-gray-800">
@@ -672,56 +677,57 @@ function App() {
                       Нажмите на чемпиона чтобы выбрать
                     </div>
                     <div className="text-xs text-gray-500">
-                      {filteredChampions.length > 100 ? `+${filteredChampions.length - 100} скрыто` : 'Все чемпионы показаны'}
+                      {filteredChampions.length} чемпионов
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Кнопка подтверждения и таймер */}
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="md:col-span-2">
-                  <button
-                    onClick={confirmSelection}
-                    disabled={!selectedChampion}
-                    className={`w-full py-3 rounded-lg font-bold text-base transition-all duration-200 flex items-center justify-center gap-2 ${
-                      selectedChampion 
-                        ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700' 
-                        : 'bg-gray-800 cursor-not-allowed'
-                    }`}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-                    </svg>
-                    ПОДТВЕРДИТЬ ВЫБОР
-                  </button>
-                </div>
+              {/* НОВЫЙ ЛЕЙАУТ: Кнопка подтверждения растянута на всю ширину */}
+              <div className="mt-3">
+                <button
+                  onClick={confirmSelection}
+                  disabled={!selectedChampion}
+                  className={`w-full py-3 rounded-lg font-bold text-base transition-all duration-200 flex items-center justify-center gap-2 ${
+                    selectedChampion 
+                      ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700' 
+                      : 'bg-gray-800 cursor-not-allowed'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                  </svg>
+                  ПОДТВЕРДИТЬ ВЫБОР
+                </button>
+              </div>
 
+              {/* Таймер теперь под кнопкой */}
+              <div className="mt-3">
                 <div className="bg-gray-900 border border-gray-800 rounded-lg p-3">
                   <div className="text-center">
-                    <div className="text-xs text-gray-300 font-bold">ТАЙМЕР</div>
+                    <div className="text-xs text-gray-300 font-bold">ТАЙМЕР ВЫБОРА</div>
                     <div className={`text-2xl font-bold font-mono mt-1 ${isTimerRunning ? 'text-green-400 animate-pulse' : 'text-gray-400'}`}>
                       {draftTimer}
                       <span className="text-xs text-gray-500 ml-1">сек</span>
                     </div>
-                    <div className="flex gap-1 mt-1 justify-center">
+                    <div className="flex gap-2 mt-2 justify-center">
                       <button
                         onClick={startDraftTimer}
-                        className={`px-2 py-1 rounded text-xs font-medium ${isTimerRunning ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                        className={`px-3 py-1.5 rounded text-sm font-medium ${isTimerRunning ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
                         disabled={isTimerRunning}
                       >
                         Старт
                       </button>
                       <button
                         onClick={stopDraftTimer}
-                        className={`px-2 py-1 rounded text-xs font-medium ${!isTimerRunning ? 'bg-gray-600 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
+                        className={`px-3 py-1.5 rounded text-sm font-medium ${!isTimerRunning ? 'bg-gray-600 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
                         disabled={!isTimerRunning}
                       >
                         Стоп
                       </button>
                       <button
                         onClick={resetDraftTimer}
-                        className="px-2 py-1 bg-gray-600 hover:bg-gray-700 rounded text-xs font-medium"
+                        className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 rounded text-sm font-medium"
                       >
                         Сброс
                       </button>
@@ -730,36 +736,7 @@ function App() {
                 </div>
               </div>
 
-              {/* Дополнительный контент */}
-              <div className="mt-6 space-y-4 mb-8">
-                <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-gray-300 mb-2">Статистика драфта</h4>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="text-center">
-                      <div className="text-xs text-gray-500">Всего чемпионов</div>
-                      <div className="text-lg font-bold text-gray-300">{champions.length}</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs text-gray-500">Отфильтровано</div>
-                      <div className="text-lg font-bold text-gray-300">{filteredChampions.length}</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs text-gray-500">Показано</div>
-                      <div className="text-lg font-bold text-gray-300">{displayedChampions.length}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-gray-300 mb-2">Инструкция</h4>
-                  <ul className="text-xs text-gray-500 space-y-1">
-                    <li>• Используйте поиск или фильтры по ролям для быстрого нахождения чемпионов</li>
-                    <li>• Нажмите на чемпиона чтобы выбрать его для пика или бана</li>
-                    <li>• Используйте таймер для контроля времени выбора</li>
-                    <li>• Настройте названия команд в верхней панели</li>
-                  </ul>
-                </div>
-              </div>
+              {/* УБИРАЕМ старый блок с инструкцией и статистикой */}
             </div>
 
             {/* Правая колонка - Красная команда */}
