@@ -1,0 +1,6 @@
+*.pyc
+*.cpython-310.pyc
+.venv/
+*.env
+*.sqlite3
+media/*
