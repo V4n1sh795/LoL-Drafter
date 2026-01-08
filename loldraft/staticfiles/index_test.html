@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Выбор чемпиона</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    #timer {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #d32f2f;
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #ffebee;
+      border-radius: 8px;
+    }
+
+    #champions-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .champion-cell {
+      width: 80px;
+      height: 80px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f9f9f9;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+      font-size: 12px;
+      text-align: center;
+      padding: 5px;
+    }
+
+    .champion-cell.selected {
+      border-color: #007bff;
+      background-color: #e7f3ff;
+      transform: scale(1.05);
+    }
+
+    .buttons-container {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    #confirm-btn {
+      background-color: #007bff;
+      color: white;
+    }
+
+    #confirm-btn:hover {
+      background-color: #0056b3;
+    }
+
+    #ban-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    #ban-btn:hover {
+      background-color: #c82333;
+    }
+
+    #result {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      text-align: center;
+      min-height: 24px;
+    }
+
+    .time-expired {
+      background-color: #ffcdd2 !important;
+      color: #b71c1c !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Выберите чемпиона</h1>
+    
+    <div id="timer">Время: 30 секунд</div>
+
+    <div id="champions-container">
+      <!-- Ячейки будут сгенерированы сюда -->
+    </div>
+
+    <div class="buttons-container">
+      <button id="confirm-btn" class="btn">Подтвердить</button>
+    </div>
+    
+    <div id="result"></div>
+  </div>
+
+  <script>
+  const champions = ["Ари", "Браум", "Виктор", "Галио", "Дариус", "Ёне", "Жанна", "Элиза", "Ксин", "Орианна"];
+  const roomID = window.location.pathname.split('/')[2];
+  const container = document.getElementById("champions-container");
+  const timerElement = document.getElementById("timer");
+  let selectedCell = null;
+  let timeLeft = 30;
+  let timerInterval = null;
+
+  // Генерация ячеек чемпионов
+  champions.forEach(name => {
+    const cell = document.createElement("div");
+    cell.classList.add("champion-cell");
+    cell.textContent = name;
+    cell.addEventListener("click", () => {
+      if (selectedCell) selectedCell.classList.remove("selected");
+      cell.classList.add("selected");
+      selectedCell = cell;
+    });
+    container.appendChild(cell);
+  });
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  async function SendChoice(champName) {
+    try {
+      const response = await fetch(`/room/${roomID}/action/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ 
+          user_uid: localStorage.getItem('user_uid'), 
+          champName: champName 
+        })
+      });
+      const data = await response.json();
+      console.log("SendChoice response:", data);
+      // Можно обновить UI на основе ответа, если нужно
+    } catch (error) {
+      console.error("Ошибка отправки выбора:", error);
+      document.getElementById("result").textContent = "Ошибка при отправке!";
+    }
+  }
+
+  // 🔁 Функция для постоянного опроса обновлений
+  async function pollUpdates() {
+    try {
+      const response = await fetch(`/room/${roomID}/update/`);
+      if (!response.ok) {
+        console.warn("Не удалось получить обновления:", response.status);
+        return;
+      }
+      const data = await response.json();
+      console.log("Обновление от сервера:", data);
+      updateTimer(data['time'])
+      // 🔄 Здесь можно обновлять UI на основе данных:
+      // Например: обновить список банов, сменить фазу, обновить таймер и т.д.
+      // Пока просто логируем — вы можете расширить позже.
+
+    } catch (error) {
+      console.error("Ошибка при опросе обновлений:", error);
+    }
+  }
+
+  // Запускаем опрос каждые 1500 мс (1.5 секунды)
+  const updateInterval = setInterval(pollUpdates, 1000);
+
+  // Таймер выбора чемпиона
+  function updateTimer(seconds) {
+  const timerElement = document.getElementById("timer");
+  
+  if (seconds <= 0) {
+    timerElement.textContent = "Время вышло!";
+    timerElement.classList.add("time-expired");
+  } else {
+    const word = seconds === 1 ? "секунда" : (seconds < 5 ? "секунды" : "секунд");
+    timerElement.textContent = `Время: ${seconds} ${word}`;
+    timerElement.classList.remove("time-expired");
+  }
+}
+
+  timerInterval = setInterval(updateTimer, 1000);
+
+  // Подтверждение выбора
+  document.getElementById("confirm-btn").addEventListener("click", () => {
+    const resultDiv = document.getElementById("result");
+    if (selectedCell) {
+      resultDiv.textContent = `Выбран чемпион: ${selectedCell.textContent}`;
+      SendChoice(selectedCell.textContent);
+      clearInterval(timerInterval); // Останавливаем таймер после выбора
+    } else {
+      resultDiv.textContent = "Сначала выберите чемпиона!";
+    }
+  });
+
+  // ❌ Удаляем вызов loop(), так как его нет
+  // loop(); ← эта строка вызывала ошибку ReferenceError!
+</script>
+</body>
+</html>
+
