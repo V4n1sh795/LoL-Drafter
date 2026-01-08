@@ -1,93 +1,304 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Выбор стороны</title>
-</head>
-<body>
-
-<div id="sideSelection">
-    <button onclick="joinSide('blue')">Синяя сторона</button>
-    <button onclick="joinSide('red')">Красная сторона</button>
-</div>
-
-<script>
-
-
-// Функция присоединения к стороне
-async function joinSide(side) {
-    const userUID = localStorage.getItem("user_uid");
-    const roomID = window.location.pathname.split('/')[2]; // из /room/abc123/
-
-    try {
-        const response = await fetch(`/room/${roomID}/join/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({ side: side, user_uid: userUID })
-        });
-
-        if (response.ok) {
-            // Успешно — скрываем кнопки
-            document.getElementById('sideSelection').style.display = 'none';
-            // Можно показать сообщение или обновить состояние
-            console.log(`Присоединились к стороне: ${side}`);
-        } else {
-            const error = await response.json();
-            alert('Ошибка: ' + (error.error || 'Не удалось присоединиться'));
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор стороны - LOL-Drafter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-    } catch (err) {
-        console.error(err);
-        alert('Ошибка сети. Проверьте подключение.');
-    }
-}
 
-// Вспомогательная функция для CSRF (если используешь POST)
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 40px;
+            animation: pulse 2s infinite;
+        }
+
+        .logo h1 {
+            color: #f8f9fa;
+            font-size: 3.5rem;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            background: linear-gradient(45deg, #4ecca3, #ff6b6b, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        .logo p {
+            color: #a0aec0;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+
+        #sideSelection {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .side-button {
+            background: linear-gradient(145deg, #2d3748, #1a202c);
+            border: none;
+            padding: 25px 50px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            min-width: 200px;
+        }
+
+        .side-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .side-button:hover::before {
+            transform: translateX(100%);
+        }
+
+        .side-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .side-button:active {
+            transform: translateY(0);
+        }
+
+        .blue-button {
+            background: linear-gradient(145deg, #2c5282, #1a365d);
+            border: 3px solid #63b3ed;
+        }
+
+        .blue-button:hover {
+            box-shadow: 0 10px 30px rgba(99, 179, 237, 0.4);
+        }
+
+        .red-button {
+            background: linear-gradient(145deg, #822727, #5d1a1a);
+            border: 3px solid #f56565;
+        }
+
+        .red-button:hover {
+            box-shadow: 0 10px 30px rgba(245, 101, 101, 0.4);
+        }
+
+        .side-button h2 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .side-button p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        .blue-glow {
+            text-shadow: 0 0 15px #63b3ed;
+        }
+
+        .red-glow {
+            text-shadow: 0 0 15px #f56565;
+        }
+
+        .ornament {
+            position: absolute;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .ornament-1 {
+            top: 10%;
+            left: 5%;
+            font-size: 4rem;
+            color: #63b3ed;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        .ornament-2 {
+            bottom: 15%;
+            right: 8%;
+            font-size: 5rem;
+            color: #f56565;
+            animation: float 8s infinite ease-in-out reverse;
+        }
+
+        .ornament-3 {
+            top: 40%;
+            right: 15%;
+            font-size: 3rem;
+            color: #45b7d1;
+            animation: float 7s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        @media (max-width: 600px) {
+            .logo h1 {
+                font-size: 2.5rem;
+            }
+            
+            .side-button {
+                padding: 20px 30px;
+                min-width: 150px;
+            }
+            
+            .side-button h2 {
+                font-size: 1.5rem;
+            }
+            
+            #sideSelection {
+                gap: 20px;
+                flex-direction: column;
+                align-items: center;
             }
         }
-    }
-    return cookieValue;
-}
-let roomID = window.location.pathname.split('/')[2]; // из /room/abc123/
+    </style>
+</head>
+<body>
+    <div class="ornament ornament-1">⚔️</div>
+    <div class="ornament ornament-2">🛡️</div>
+    <div class="ornament ornament-3">🏆</div>
 
-async function checkRoomStatus() {
-    try {
-        const response = await fetch(`/room/${roomID}/status/`);
-        const data = await response.json();
-        console.log(data)
-        if (data.ready) {
-            console.log("Оба капитана присоединились! Переключаемся на драфт...");
-            // Вариант 1: перезагрузить страницу (она сама отрендерит index.html)
-            window.location.reload();
+    <div class="container">
+        <div class="logo">
+            <h1>LOL-DRAFTER</h1>
+            <p>Выберите свою сторону для эпического драфта</p>
+        </div>
 
-            // Вариант 2: перейти на SPA напрямую (если index.html — React)
-            // window.location.href = window.location.href; // то же самое
-        } else {
-            // Повторяем опрос через 1.5 секунды
-            setTimeout(checkRoomStatus, 1500);
+        <div id="sideSelection">
+            <button class="side-button blue-button" onclick="joinSide('blue')">
+                <h2 class="blue-glow">Синяя сторона</h2>
+                <p>Team Blue • The Defenders</p>
+            </button>
+            <button class="side-button red-button" onclick="joinSide('red')">
+                <h2 class="red-glow">Красная сторона</h2>
+                <p>Team Red • The Challengers</p>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Функция присоединения к стороне
+        async function joinSide(side) {
+            const userUID = localStorage.getItem("user_uid");
+            const roomID = window.location.pathname.split('/')[2]; // из /room/abc123/
+
+            try {
+                const response = await fetch(`/room/${roomID}/join/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ side: side, user_uid: userUID })
+                });
+
+                if (response.ok) {
+                    // Успешно — скрываем кнопки
+                    document.getElementById('sideSelection').style.display = 'none';
+                    // Можно показать сообщение или обновить состояние
+                    console.log(`Присоединились к стороне: ${side}`);
+                } else {
+                    const error = await response.json();
+                    alert('Ошибка: ' + (error.error || 'Не удалось присоединиться'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка сети. Проверьте подключение.');
+            }
         }
-    } catch (error) {
-        console.error("Ошибка при проверке статуса:", error);
-        // Повторяем даже при ошибке
-        setTimeout(checkRoomStatus, 2000);
-    }
-}
 
-// Запускаем опрос сразу при загрузке страницы
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("Начинаем опрос статуса комнаты...");
-    checkRoomStatus();
-});
-</script>
+        // Вспомогательная функция для CSRF (если используешь POST)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        let roomID = window.location.pathname.split('/')[2]; // из /room/abc123/
+
+        async function checkRoomStatus() {
+            try {
+                const response = await fetch(`/room/${roomID}/status/`);
+                const data = await response.json();
+                console.log(data)
+                if (data.ready) {
+                    console.log("Оба капитана присоединились! Переключаемся на драфт...");
+                    // Вариант 1: перезагрузить страницу (она сама отрендерит index.html)
+                    window.location.reload();
+
+                    // Вариант 2: перейти на SPA напрямую (если index.html — React)
+                    // window.location.href = window.location.href; // то же самое
+                } else {
+                    // Повторяем опрос через 1.5 секунды
+                    setTimeout(checkRoomStatus, 1500);
+                }
+            } catch (error) {
+                console.error("Ошибка при проверке статуса:", error);
+                // Повторяем даже при ошибке
+                setTimeout(checkRoomStatus, 2000);
+            }
+        }
+
+        // Запускаем опрос сразу при загрузке страницы
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Начинаем опрос статуса комнаты...");
+            checkRoomStatus();
+        });
+    </script>
 </body>
 </html>
+

@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'frontend', 'build'),
+    # os.path.join(BASE_DIR, 'frontend', 'build'),
     'lold/static',
     ]
 
@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-dxdm1dfo3t6@-4==bt9ak%vl9aj^%7pu+k+p!zvbw0$ljm79@^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition

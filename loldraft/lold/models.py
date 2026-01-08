@@ -1,6 +1,9 @@
 # models.py
 from django.db import models
 import uuid
+from django.db.models import JSONField
+
+
 
 class DraftRoom(models.Model):
     room_id = models.CharField(max_length=36, unique=True, default=uuid.uuid4)
@@ -45,3 +48,4 @@ class ChampionAction(models.Model):
 
     def __str__(self):
         return f"{self.side} {self.action_type}s {self.champion_name}"
+
