@@ -28,6 +28,7 @@ def draft_room(request, room_id):
     if room.blue_captain != '' and room.red_captain != '':
         room.status = 'ban_phase'
         SimpleRoomTimer.start_timer(room_id=room_id, duration_seconds=60.0)
+        room.cur_turn = 'blue'
         room.save()
         return render(request, "index_test.html")
     else:
@@ -77,12 +78,16 @@ def update(_, room_id):
     picks, _ = PickPhase.objects.get_or_create(room=room)
     data = {
         'time': SimpleRoomTimer.get_time_left(room_id=room_id),
+        'cur_Turn': room.cur_turn,
         'status': room.status,
         'red_bans': bans.champions_Red_team,
         'blue_bans': bans.champions_Blue_team,
         'red_picks': picks.champions_Red_team,
         'blue_piks': picks.champions_Blue_team
     }
+    if len(bans.champions_Blue_team) == 5 and len(bans.champions_Red_team) == 5:
+        room.status = 'pick_phase'
+        room.save()
     return JsonResponse(data=data)
 @require_http_methods(["POST"])
 @csrf_exempt
@@ -104,18 +109,26 @@ def action(request, room_id):
     
     response_data = {"status": room.status}
     
+    
+
     if room.status == 'ban_phase':
         if room.blue_captain == user_uid:
             # Добавляем в синюю команду (более безопасный способ)
             bans.champions_Blue_team = bans.champions_Blue_team or []
             bans.champions_Blue_team.append(champName)
+            room.cur_turn = 'red'
+            SimpleRoomTimer.reset_timer(room_id=room_id)
             bans.save()
+            room.save()
             response_data["bans"] = (bans.champions_Blue_team or []) + (bans.champions_Red_team or [])
             
         elif room.red_captain == user_uid:
             bans.champions_Red_team = bans.champions_Red_team or []
             bans.champions_Red_team.append(champName)
+            room.cur_turn = 'blue'
+            SimpleRoomTimer.reset_timer(room_id=room_id)
             bans.save()
+            room.save()
             response_data["bans"] = (bans.champions_Blue_team or []) + (bans.champions_Red_team or [])
         else:
             return JsonResponse({"error": "Not authorized"}, status=403)
@@ -127,13 +140,19 @@ def action(request, room_id):
             picks.champions_Blue_team = picks.champions_Blue_team or []
             picks.champions_Blue_team.append(champName)
             picks.save()
+            room.cur_turn = 'red'
+            SimpleRoomTimer.reset_timer(room_id=room_id)
+            room.save()
             response_data["picks"] = (picks.champions_Blue_team or []) + (picks.champions_Red_team or [])
             
         elif room.red_captain == user_uid:
             # ВАЖНО: здесь была ошибка - добавляли в синюю команду вместо красной
             picks.champions_Red_team = picks.champions_Red_team or []
             picks.champions_Red_team.append(champName)
+            room.cur_turn = 'blue'
+            SimpleRoomTimer.reset_timer(room_id=room_id)
             picks.save()
+            room.save()
             response_data["picks"] = (picks.champions_Blue_team or []) + (picks.champions_Red_team or [])
         else:
             return JsonResponse({"error": "Not authorized"}, status=403)

@@ -3,17 +3,20 @@ from django.db import models
 import uuid
 from django.db.models import JSONField
 from enum import Enum
+
 class Stage(Enum):
     waiting = 'waiting'
     select_side = 'select_side'
     ban_phase = 'ban_phase'
     pick_phase = 'pick_phase'
+
 class DraftRoom(models.Model):
     room_id = models.CharField(max_length=36, unique=True, default=uuid.uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
     blue_captain = models.CharField(max_length=100, blank=True, default='')
     red_captain = models.CharField(max_length=100, blank=True, default='')
-    status = models.CharField(max_length=100, blank=True, default='waiting')
+    status = models.CharField(max_length=10, blank=True, default='waiting')
+    cur_turn = models.CharField(max_length=10, blank=True, default='waiting')
     def __str__(self):
         return f"Комната {self.room_id}"
     

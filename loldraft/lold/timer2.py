@@ -78,16 +78,26 @@ class SimpleRoomTimer:
     @classmethod
     def reset_timer(cls, room_id):
         """
-        Обнуляет (удаляет) таймер комнаты
+        Перезапускает таймер комнаты с тем же временем (если он существовал)
         
         Args:
             room_id: идентификатор комнаты
             
         Returns:
-            bool: True если таймер был удален, False если его не было
+            dict: данные нового таймера или None, если предыдущего таймера не было
         """
         cache_key = cls._get_cache_key(room_id)
-        return cache.delete(cache_key)
+        timer_data = cache.get(cache_key)
+        
+        if not timer_data:
+            return None  # Нет таймера для сброса
+        
+        duration = timer_data.get('duration')
+        if duration is None:
+            return None
+        
+        # Перезапускаем таймер с тем же duration
+        return cls.start_timer(room_id, duration)
     
     # Дополнительные полезные методы (опционально)
     
