@@ -27,7 +27,7 @@ def draft_room(request, room_id):
     print("blue ", room.blue_captain,"red ", room.red_captain)
     if room.blue_captain != '' and room.red_captain != '':
         room.status = 'ban_phase'
-        SimpleRoomTimer.start_timer(room_id=room_id, duration_seconds=60.0)
+        SimpleRoomTimer.start_timer(room_id=room_id, duration_seconds=30.0)
         room.cur_turn = 'blue'
         room.save()
         return render(request, "index_test.html")
