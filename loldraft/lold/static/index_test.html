@@ -3,250 +3,437 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Выбор чемпиона</title>
+  <title>Турнирный драфт — League of Legends</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f5f5f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0f0f1b;
+      color: #e0e0ff;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      position: relative;
     }
 
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: white;
+    /* === РАМКА ВОКРУГ ВСЕГО ДРАФТА === */
+    .draft-frame {
+      max-width: 1400px;
+      margin: 40px auto;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      background: linear-gradient(135deg, #0a0a14, #151528);
+      border: 2px solid #3a3a6e;
+      border-radius: 16px;
+      box-shadow: 0 0 30px rgba(100, 0, 255, 0.4);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* === ПИКИ ПО БОКАМ ЭКРАНА === */
+    .side-panel {
+      position: absolute;
+      top: 120px;
+      width: 180px; /* ← увеличено для прямоугольных ячеек */
+      display: flex;
+      flex-direction: column;
+      gap: 10px; /* ← отступы между ячейками */
+      z-index: 10;
+    }
+
+    .side-panel.left {
+      left: 20px;
+    }
+
+    .side-panel.right {
+      right: 20px;
+    }
+
+    .team-label {
+      text-align: center;
+      font-weight: bold;
+      color: #8a8aff;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .slot {
+      width: 160px; /* ← ширина увеличена */
+      height: 80px; /* ← высота уменьшена — горизонтальный прямоугольник */
+      background-color: #1e1e35;
+      border: 2px dashed #4a4a7a;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      text-align: center;
+      padding: 6px;
+      color: #aaa;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .slot:hover {
+      border-color: #8a8aff;
+      transform: scale(1.02);
+    }
+
+    .slot.filled {
+      border-style: solid;
+      border-color: #8a2be2;
+      background-color: #252540;
+      color: #ffffff;
+    }
+
+    /* === ЦЕНТРАЛЬНЫЙ КОНТЕЙНЕР === */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background-color: #151528;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(100, 0, 255, 0.3);
+      border: 1px solid #3a3a6e;
+      position: relative;
     }
 
     h1 {
       text-align: center;
-      color: #333;
-      margin-bottom: 20px;
+      color: #c9a0ff;
+      margin-bottom: 15px;
+      font-size: 28px;
+      text-shadow: 0 0 10px rgba(180, 100, 255, 0.5);
     }
 
     #timer {
       text-align: center;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: bold;
-      color: #d32f2f;
-      margin-bottom: 20px;
+      color: #ff6b6b;
+      margin: 15px 0;
       padding: 10px;
-      background-color: #ffebee;
+      background-color: #22223a;
       border-radius: 8px;
+      border: 1px solid #444466;
     }
 
+    /* === ПУЛ ЧЕМПИОНОВ: 9 в ряд, прокрутка ТОЛЬКО по вертикали === */
     #champions-container {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(9, 80px);
       gap: 10px;
-      margin-bottom: 20px;
       justify-content: center;
+      max-height: 500px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 12px;
+      background-color: #1a1a2e;
+      border-radius: 10px;
+      border: 1px solid #333355;
+      margin-bottom: 20px;
     }
 
     .champion-cell {
       width: 80px;
       height: 80px;
-      border: 2px solid #ccc;
+      border: 2px solid #444;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #f9f9f9;
+      background-color: #22223a;
       cursor: pointer;
       font-weight: bold;
       transition: all 0.2s;
-      font-size: 12px;
+      font-size: 11px;
       text-align: center;
-      padding: 5px;
+      padding: 4px;
+      color: #d0d0ff;
+      flex-shrink: 0;
+    }
+
+    .champion-cell:hover {
+      border-color: #8a8aff;
+      transform: scale(1.05);
+      background-color: #2a2a45;
     }
 
     .champion-cell.selected {
-      border-color: #007bff;
-      background-color: #e7f3ff;
-      transform: scale(1.05);
+      border-color: #ffcc00;
+      background-color: #302540;
+      transform: scale(1.1);
+      box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
     }
 
     .buttons-container {
       display: flex;
-      gap: 10px;
       justify-content: center;
-      margin-bottom: 20px;
+      margin: 20px 0;
     }
 
     .btn {
-      padding: 10px 20px;
-      font-size: 16px;
+      padding: 12px 30px;
+      font-size: 17px;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    #confirm-btn {
-      background-color: #007bff;
+      font-weight: bold;
+      transition: all 0.2s;
       color: white;
+      background: linear-gradient(to bottom, #4a90e2, #2a5db0);
     }
-
-    #confirm-btn:hover {
-      background-color: #0056b3;
-    }
-
-    #ban-btn {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    #ban-btn:hover {
-      background-color: #c82333;
+    .btn:hover {
+      background: linear-gradient(to bottom, #5aa0f2, #3a6dc0);
+      transform: translateY(-2px);
     }
 
     #result {
       margin-top: 15px;
       font-size: 18px;
       font-weight: bold;
-      color: #333;
+      color: #a0ffa0;
       text-align: center;
       min-height: 24px;
     }
 
     .time-expired {
-      background-color: #ffcdd2 !important;
-      color: #b71c1c !important;
+      background-color: #402025 !important;
+      color: #ff9999 !important;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+    }
+
+    /* === БАНЫ ВНИЗУ — ПОБЛИЖЕ К КРАЯМ === */
+    .bans-section {
+      display: flex;
+      gap: 40px;
+      justify-content: space-between; /* ← растягиваем по краям */
+      padding: 0 40px; /* ← отступы от краев */
+      margin: 20px 0 40px;
+    }
+
+    .bans-team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .bans-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .bans-row .slot {
+      width: 80px;
+      height: 80px;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>Выберите чемпиона</h1>
-    
-    <div id="timer">Время: 30 секунд</div>
+  <!-- РАМКА ВОКРУГ ВСЕГО -->
+  <div class="draft-frame">
 
-    <div id="champions-container">
-      <!-- Ячейки будут сгенерированы сюда -->
+    <!-- ПИКИ ПО БОКАМ -->
+    <div class="side-panel left">
+      <div class="team-label">Команда A</div>
+      <div id="team-a-picks" class="team-slots">
+        <div class="slot">TOP</div>
+        <div class="slot">JG</div>
+        <div class="slot">MID</div>
+        <div class="slot">ADC</div>
+        <div class="slot">SUP</div>
+      </div>
     </div>
 
-    <div class="buttons-container">
-      <button id="confirm-btn" class="btn">Подтвердить</button>
+    <div class="side-panel right">
+      <div class="team-label">Команда B</div>
+      <div id="team-b-picks" class="team-slots">
+        <div class="slot">TOP</div>
+        <div class="slot">JG</div>
+        <div class="slot">MID</div>
+        <div class="slot">ADC</div>
+        <div class="slot">SUP</div>
+      </div>
     </div>
-    
-    <div id="result"></div>
+
+    <!-- ЦЕНТРАЛЬНЫЙ БЛОК -->
+    <div class="container">
+      <h1>Турнирный драфт — League of Legends</h1>
+      
+      <div id="timer">Время: 30 секунд</div>
+
+      <div id="champions-container">
+        <!-- Ячейки будут сгенерированы сюда -->
+      </div>
+
+      <div class="buttons-container">
+        <button id="confirm-btn" class="btn">Подтвердить</button>
+      </div>
+      
+      <div id="result"></div>
+    </div>
+
+    <!-- БАНЫ -->
+    <div class="bans-section">
+      <div class="bans-team">
+        <div class="team-label">Баны A</div>
+        <div class="bans-row" id="team-a-bans">
+          <div class="slot">BAN 1</div>
+          <div class="slot">BAN 2</div>
+          <div class="slot">BAN 3</div>
+          <div class="slot">BAN 4</div>
+          <div class="slot">BAN 5</div>
+        </div>
+      </div>
+
+      <div class="bans-team">
+        <div class="team-label">Баны B</div>
+        <div class="bans-row" id="team-b-bans">
+          <div class="slot">BAN 1</div>
+          <div class="slot">BAN 2</div>
+          <div class="slot">BAN 3</div>
+          <div class="slot">BAN 4</div>
+          <div class="slot">BAN 5</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
-  const champions = ["Ари", "Браум", "Виктор", "Галио", "Дариус", "Ёне", "Жанна", "Элиза", "Ксин", "Орианна"];
-  const roomID = window.location.pathname.split('/')[2];
-  const container = document.getElementById("champions-container");
-  const timerElement = document.getElementById("timer");
-  let selectedCell = null;
-  let timeLeft = 30;
-  let timerInterval = null;
+    // === СПИСОК ИЗ 172 ЧЕМПИОНОВ ===
+    const champions = Array.from({length: 172}, (_, i) => `Чемпион ${i + 1}`);
 
-  // Генерация ячеек чемпионов
-  champions.forEach(name => {
-    const cell = document.createElement("div");
-    cell.classList.add("champion-cell");
-    cell.textContent = name;
-    cell.addEventListener("click", () => {
-      if (selectedCell) selectedCell.classList.remove("selected");
-      cell.classList.add("selected");
-      selectedCell = cell;
+    const roomID = window.location.pathname.split('/')[2];
+    const container = document.getElementById("champions-container");
+    const timerElement = document.getElementById("timer");
+    let selectedCell = null;
+    let timeLeft = 30;
+    let timerInterval = null;
+
+    // Генерация ячеек чемпионов (БЕЗ ИЗМЕНЕНИЙ)
+    champions.forEach(name => {
+      const cell = document.createElement("div");
+      cell.classList.add("champion-cell");
+      cell.textContent = name;
+      cell.addEventListener("click", () => {
+        if (selectedCell) selectedCell.classList.remove("selected");
+        cell.classList.add("selected");
+        selectedCell = cell;
+      });
+      container.appendChild(cell);
     });
-    container.appendChild(cell);
-  });
 
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
         }
       }
+      return cookieValue;
     }
-    return cookieValue;
-  }
 
-  async function SendChoice(champName) {
-    try {
-      const response = await fetch(`/room/${roomID}/action/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({ 
-          user_uid: localStorage.getItem('user_uid'), 
-          champName: champName 
-        })
-      });
-      const data = await response.json();
-      console.log("SendChoice response:", data);
-      // Можно обновить UI на основе ответа, если нужно
-    } catch (error) {
-      console.error("Ошибка отправки выбора:", error);
-      document.getElementById("result").textContent = "Ошибка при отправке!";
-    }
-  }
-
-  // 🔁 Функция для постоянного опроса обновлений
-  async function pollUpdates() {
-    try {
-      const response = await fetch(`/room/${roomID}/update/`);
-      if (!response.ok) {
-        console.warn("Не удалось получить обновления:", response.status);
-        return;
+    async function SendChoice(champName) {
+      try {
+        const response = await fetch(`/room/${roomID}/action/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ 
+            user_uid: localStorage.getItem('user_uid'), 
+            champName: champName 
+          })
+        });
+        const data = await response.json();
+        console.log("SendChoice response:", data);
+      } catch (error) {
+        console.error("Ошибка отправки выбора:", error);
+        document.getElementById("result").textContent = "Ошибка при отправке!";
       }
-      const data = await response.json();
-      console.log("Обновление от сервера:", data);
-      updateTimer(data['time'])
-      // 🔄 Здесь можно обновлять UI на основе данных:
-      // Например: обновить список банов, сменить фазу, обновить таймер и т.д.
-      // Пока просто логируем — вы можете расширить позже.
-
-    } catch (error) {
-      console.error("Ошибка при опросе обновлений:", error);
     }
-  }
 
-  const updateInterval = setInterval(pollUpdates, 1000);
-
-  // Таймер выбора чемпиона
-  function updateTimer(seconds) {
-  const timerElement = document.getElementById("timer");
-  
-  if (seconds <= 0) {
-    timerElement.textContent = "Время вышло!";
-    timerElement.classList.add("time-expired");
-  } else {
-    const word = seconds === 1 ? "секунда" : (seconds < 5 ? "секунды" : "секунд");
-    timerElement.textContent = `Время: ${seconds} ${word}`;
-    timerElement.classList.remove("time-expired");
-  }
-}
-
-  timerInterval = setInterval(updateTimer, 1000);
-
-  // Подтверждение выбора
-  document.getElementById("confirm-btn").addEventListener("click", () => {
-    const resultDiv = document.getElementById("result");
-    if (selectedCell) {
-      resultDiv.textContent = `Выбран чемпион: ${selectedCell.textContent}`;
-      SendChoice(selectedCell.textContent);
-      clearInterval(timerInterval); // Останавливаем таймер после выбора
-    } else {
-      resultDiv.textContent = "Сначала выберите чемпиона!";
+    async function pollUpdates() {
+      try {
+        const response = await fetch(`/room/${roomID}/update/`);
+        if (!response.ok) {
+          console.warn("Не удалось получить обновления:", response.status);
+          return;
+        }
+        const data = await response.json();
+        console.log("Обновление от сервера:", data);
+        updateTimer(data['time']);
+      } catch (error) {
+        console.error("Ошибка при опросе обновлений:", error);
+      }
     }
-  });
 
-  // ❌ Удаляем вызов loop(), так как его нет
-  // loop(); ← эта строка вызывала ошибку ReferenceError!
-</script>
+    const updateInterval = setInterval(pollUpdates, 1000);
+
+    function updateTimer(seconds) {
+      if (seconds <= 0) {
+        timerElement.textContent = "Время вышло!";
+        timerElement.classList.add("time-expired");
+      } else {
+        const word = seconds === 1 ? "секунда" : (seconds < 5 ? "секунды" : "секунд");
+        timerElement.textContent = `Время: ${seconds} ${word}`;
+        timerElement.classList.remove("time-expired");
+      }
+    }
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimer(timeLeft);
+    }, 1000);
+
+    // === ЛОГИКА ОТОБРАЖЕНИЯ (БЕЗ ИЗМЕНЕНИЙ В ОТПРАВКЕ) ===
+    let pickCountA = 0;
+    let pickCountB = 0;
+
+    function fillSlot(slots, index, name) {
+      if (index < slots.children.length) {
+        const slot = slots.children[index];
+        slot.textContent = name;
+        slot.classList.add("filled");
+      }
+    }
+
+    document.getElementById("confirm-btn").addEventListener("click", () => {
+      const resultDiv = document.getElementById("result");
+      if (selectedCell) {
+        const champName = selectedCell.textContent;
+        resultDiv.textContent = `Выбран чемпион: ${champName}`;
+        SendChoice(champName);
+
+        if (pickCountA < 5) {
+          fillSlot(document.getElementById("team-a-picks"), pickCountA, champName);
+          pickCountA++;
+        } else if (pickCountB < 5) {
+          fillSlot(document.getElementById("team-b-picks"), pickCountB, champName);
+          pickCountB++;
+        }
+
+        selectedCell.classList.remove("selected");
+        selectedCell.style.opacity = "0.4";
+        selectedCell.style.pointerEvents = "none";
+        selectedCell = null;
+      } else {
+        resultDiv.textContent = "Сначала выберите чемпиона!";
+      }
+    });
+  </script>
 </body>
 </html>
-
