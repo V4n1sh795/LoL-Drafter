@@ -11,53 +11,58 @@
       color: #e0e0ff;
       margin: 0;
       padding: 0;
-      overflow-x: hidden;
-      position: relative;
+      overflow: hidden;
+      height: 100vh;
     }
 
-    /* === РАМКА ВОКРУГ ВСЕГО ДРАФТА === */
-    .draft-frame {
-      max-width: 1400px;
-      margin: 40px auto;
-      padding: 20px;
-      background: linear-gradient(135deg, #0a0a14, #151528);
-      border: 2px solid #3a3a6e;
-      border-radius: 16px;
-      box-shadow: 0 0 30px rgba(100, 0, 255, 0.4);
-      position: relative;
-      z-index: 1;
-    }
-
-    /* === ПИКИ ПО БОКАМ ЭКРАНА === */
+    /* === ПИКИ: с увеличенным расстоянием между ячейками === */
     .side-panel {
-      position: absolute;
-      top: 120px;
-      width: 180px; /* ← увеличено для прямоугольных ячеек */
+      position: fixed;
+      width: 200px;
+      top: 10px; /* УПИРАЕТСЯ В ПОТОЛОК */
       display: flex;
       flex-direction: column;
-      gap: 10px; /* ← отступы между ячейками */
+      gap: 30px;
       z-index: 10;
     }
 
     .side-panel.left {
-      left: 20px;
+      left: 10px;
     }
 
     .side-panel.right {
-      right: 20px;
+      right: 10px;
     }
 
     .team-label {
+      position: fixed;
       text-align: center;
       font-weight: bold;
       color: #8a8aff;
       font-size: 16px;
-      margin-bottom: 8px;
+      z-index: 10;
+    }
+
+    .side-panel.left .team-label {
+      left: 10px;
+      top: 10px; /* УПИРАЕТСЯ В ПОТОЛОК */
+    }
+
+    .side-panel.right .team-label {
+      right: 10px;
+      top: 10px; /* УПИРАЕТСЯ В ПОТОЛОК */
+    }
+
+    .team-slots {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      margin-top: 30px; /* Отступ от названия команды */
     }
 
     .slot {
-      width: 160px; /* ← ширина увеличена */
-      height: 80px; /* ← высота уменьшена — горизонтальный прямоугольник */
+      width: 200px;
+      height: 100px;
       background-color: #1e1e35;
       border: 2px dashed #4a4a7a;
       border-radius: 8px;
@@ -69,12 +74,6 @@
       padding: 6px;
       color: #aaa;
       font-weight: bold;
-      transition: all 0.2s;
-    }
-
-    .slot:hover {
-      border-color: #8a8aff;
-      transform: scale(1.02);
     }
 
     .slot.filled {
@@ -86,57 +85,120 @@
 
     /* === ЦЕНТРАЛЬНЫЙ КОНТЕЙНЕР === */
     .container {
-      max-width: 1000px;
-      margin: 0 auto;
+      width: 900px;
       background-color: #151528;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 0 20px rgba(100, 0, 255, 0.3);
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 0 15px rgba(100, 0, 255, 0.3);
       border: 1px solid #3a3a6e;
-      position: relative;
+      position: absolute;
+      top: 120px; /* ПРИПОДНЯТ ВЫШЕ */
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* === МАСШТАБ 1.2X === */
+    .scale-wrapper {
+      transform: scale(1.2);
+      transform-origin: top center;
     }
 
     h1 {
       text-align: center;
       color: #c9a0ff;
-      margin-bottom: 15px;
-      font-size: 28px;
-      text-shadow: 0 0 10px rgba(180, 100, 255, 0.5);
+      margin: 8px 0;
+      font-size: 24px;
+      text-shadow: 0 0 8px rgba(180, 100, 255, 0.5);
     }
 
     #timer {
       text-align: center;
-      font-size: 22px;
+      font-size: 20px;
       font-weight: bold;
       color: #ff6b6b;
-      margin: 15px 0;
-      padding: 10px;
+      margin: 6px 0;
+      padding: 6px;
       background-color: #22223a;
-      border-radius: 8px;
+      border-radius: 6px;
       border: 1px solid #444466;
     }
 
-    /* === ПУЛ ЧЕМПИОНОВ: 9 в ряд, прокрутка ТОЛЬКО по вертикали === */
+    .champions-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 4px;
+      margin-bottom: 6px;
+    }
+
+    .roles-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .role-cell {
+      width: 40px;
+      height: 40px;
+      background-color: #1a1a2e;
+      border: 1px solid #444;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      color: #a0a0ff;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .role-cell:hover {
+      border-color: #8a8aff;
+      background-color: #22223a;
+    }
+
+    #search-input {
+      width: 180px;
+      padding: 6px 10px;
+      background-color: #1a1a2e;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #e0e0ff;
+      font-size: 14px;
+    }
+
+    #search-input::placeholder {
+      color: #666;
+    }
+
+    #search-input:focus {
+      outline: none;
+      border-color: #8a8aff;
+    }
+
     #champions-container {
       display: grid;
-      grid-template-columns: repeat(9, 80px);
-      gap: 10px;
+      grid-template-columns: repeat(9, 75px);
+      gap: 8px;
       justify-content: center;
-      max-height: 500px;
+      max-height: 360px;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 12px;
+      padding: 8px;
       background-color: #1a1a2e;
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid #333355;
-      margin-bottom: 20px;
     }
 
     .champion-cell {
-      width: 80px;
-      height: 80px;
+      width: 75px;
+      height: 75px;
       border: 2px solid #444;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -144,9 +206,9 @@
       cursor: pointer;
       font-weight: bold;
       transition: all 0.2s;
-      font-size: 11px;
+      font-size: 10px;
       text-align: center;
-      padding: 4px;
+      padding: 3px;
       color: #d0d0ff;
       flex-shrink: 0;
     }
@@ -161,20 +223,20 @@
       border-color: #ffcc00;
       background-color: #302540;
       transform: scale(1.1);
-      box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
+      box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
     }
 
     .buttons-container {
       display: flex;
       justify-content: center;
-      margin: 20px 0;
+      margin: 8px 0;
     }
 
     .btn {
-      padding: 12px 30px;
-      font-size: 17px;
+      padding: 8px 24px;
+      font-size: 15px;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
       font-weight: bold;
       transition: all 0.2s;
@@ -183,16 +245,16 @@
     }
     .btn:hover {
       background: linear-gradient(to bottom, #5aa0f2, #3a6dc0);
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
 
     #result {
-      margin-top: 15px;
-      font-size: 18px;
+      margin-top: 6px;
+      font-size: 16px;
       font-weight: bold;
       color: #a0ffa0;
       text-align: center;
-      min-height: 24px;
+      min-height: 20px;
     }
 
     .time-expired {
@@ -207,66 +269,95 @@
       100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
     }
 
-    /* === БАНЫ ВНИЗУ — ПОБЛИЖЕ К КРАЯМ === */
-    .bans-section {
-      display: flex;
-      gap: 40px;
-      justify-content: space-between; /* ← растягиваем по краям */
-      padding: 0 40px; /* ← отступы от краев */
-      margin: 20px 0 40px;
-    }
-
-    .bans-team {
+    /* === БАНЫ: оставлены внизу, но надписи подняты === */
+    .ban-team-a {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      z-index: 10;
+    }
+
+    .ban-team-b {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .ban-team-a .team-label {
+      position: relative;
+      top: 0;
+      left: 0;
+      margin-bottom: 5px; /* Отступ над ячейками банов */
+    }
+
+    .ban-team-b .team-label {
+      position: relative;
+      top: 0;
+      right: 0;
+      margin-bottom: 5px; /* Отступ над ячейками банов */
     }
 
     .bans-row {
       display: flex;
-      gap: 10px;
-      margin-top: 8px;
+      gap: 12px;
     }
 
     .bans-row .slot {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
 
-  <!-- РАМКА ВОКРУГ ВСЕГО -->
-  <div class="draft-frame">
-
-    <!-- ПИКИ ПО БОКАМ -->
-    <div class="side-panel left">
-      <div class="team-label">Команда A</div>
-      <div id="team-a-picks" class="team-slots">
-        <div class="slot">TOP</div>
-        <div class="slot">JG</div>
-        <div class="slot">MID</div>
-        <div class="slot">ADC</div>
-        <div class="slot">SUP</div>
-      </div>
+  <!-- ПИКИ -->
+  <div class="side-panel left">
+    <div class="team-label">Команда A</div>
+    <div id="team-a-picks" class="team-slots">
+      <div class="slot">TOP</div>
+      <div class="slot">JG</div>
+      <div class="slot">MID</div>
+      <div class="slot">ADC</div>
+      <div class="slot">SUP</div>
     </div>
+  </div>
 
-    <div class="side-panel right">
-      <div class="team-label">Команда B</div>
-      <div id="team-b-picks" class="team-slots">
-        <div class="slot">TOP</div>
-        <div class="slot">JG</div>
-        <div class="slot">MID</div>
-        <div class="slot">ADC</div>
-        <div class="slot">SUP</div>
-      </div>
+  <div class="side-panel right">
+    <div class="team-label">Команда B</div>
+    <div id="team-b-picks" class="team-slots">
+      <div class="slot">TOP</div>
+      <div class="slot">JG</div>
+      <div class="slot">MID</div>
+      <div class="slot">ADC</div>
+      <div class="slot">SUP</div>
     </div>
+  </div>
 
-    <!-- ЦЕНТРАЛЬНЫЙ БЛОК -->
-    <div class="container">
+  <!-- ЦЕНТРАЛЬНЫЙ БЛОК -->
+  <div class="container">
+    <div class="scale-wrapper">
       <h1>Турнирный драфт — League of Legends</h1>
       
       <div id="timer">Время: 30 секунд</div>
+
+      <div class="champions-header">
+        <div class="roles-row">
+          <button class="role-cell">TOP</button>
+          <button class="role-cell">JG</button>
+          <button class="role-cell">MID</button>
+          <button class="role-cell">ADC</button>
+          <button class="role-cell">SUP</button>
+        </div>
+        <input type="text" id="search-input" placeholder="Поиск чемпиона...">
+      </div>
 
       <div id="champions-container">
         <!-- Ячейки будут сгенерированы сюда -->
@@ -278,32 +369,29 @@
       
       <div id="result"></div>
     </div>
+  </div>
 
-    <!-- БАНЫ -->
-    <div class="bans-section">
-      <div class="bans-team">
-        <div class="team-label">Баны A</div>
-        <div class="bans-row" id="team-a-bans">
-          <div class="slot">BAN 1</div>
-          <div class="slot">BAN 2</div>
-          <div class="slot">BAN 3</div>
-          <div class="slot">BAN 4</div>
-          <div class="slot">BAN 5</div>
-        </div>
-      </div>
-
-      <div class="bans-team">
-        <div class="team-label">Баны B</div>
-        <div class="bans-row" id="team-b-bans">
-          <div class="slot">BAN 1</div>
-          <div class="slot">BAN 2</div>
-          <div class="slot">BAN 3</div>
-          <div class="slot">BAN 4</div>
-          <div class="slot">BAN 5</div>
-        </div>
-      </div>
+  <!-- БАНЫ -->
+  <div class="ban-team-a">
+    <div class="team-label">Баны A</div>
+    <div class="bans-row" id="team-a-bans">
+      <div class="slot">BAN 1</div>
+      <div class="slot">BAN 2</div>
+      <div class="slot">BAN 3</div>
+      <div class="slot">BAN 4</div>
+      <div class="slot">BAN 5</div>
     </div>
+  </div>
 
+  <div class="ban-team-b">
+    <div class="team-label">Баны B</div>
+    <div class="bans-row" id="team-b-bans">
+      <div class="slot">BAN 1</div>
+      <div class="slot">BAN 2</div>
+      <div class="slot">BAN 3</div>
+      <div class="slot">BAN 4</div>
+      <div class="slot">BAN 5</div>
+    </div>
   </div>
 
   <script>
@@ -317,7 +405,8 @@
     let timeLeft = 30;
     let timerInterval = null;
 
-    // Генерация ячеек чемпионов (БЕЗ ИЗМЕНЕНИЙ)
+    const championCells = [];
+
     champions.forEach(name => {
       const cell = document.createElement("div");
       cell.classList.add("champion-cell");
@@ -328,8 +417,26 @@
         selectedCell = cell;
       });
       container.appendChild(cell);
+      championCells.push({ element: cell, name: name });
     });
 
+    // Роли — пока только визуальные кнопки
+    document.querySelectorAll(".role-cell").forEach(btn => {
+      btn.addEventListener("click", () => {
+        // Можно добавить фильтрацию по роли позже
+      });
+    });
+
+    // Поиск
+    const searchInput = document.getElementById("search-input");
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.trim().toLowerCase();
+      championCells.forEach(({ element, name }) => {
+        element.style.display = (query === "" || name.toLowerCase().includes(query)) ? "flex" : "none";
+      });
+    });
+
+    // Куки
     function getCookie(name) {
       let cookieValue = null;
       if (document.cookie && document.cookie !== '') {
@@ -345,6 +452,7 @@
       return cookieValue;
     }
 
+    // Отправка выбора
     async function SendChoice(champName) {
       try {
         const response = await fetch(`/room/${roomID}/action/`, {
@@ -366,6 +474,7 @@
       }
     }
 
+    // Опрос обновлений
     async function pollUpdates() {
       try {
         const response = await fetch(`/room/${roomID}/update/`);
@@ -383,6 +492,7 @@
 
     const updateInterval = setInterval(pollUpdates, 1000);
 
+    // Таймер
     function updateTimer(seconds) {
       if (seconds <= 0) {
         timerElement.textContent = "Время вышло!";
@@ -399,7 +509,7 @@
       updateTimer(timeLeft);
     }, 1000);
 
-    // === ЛОГИКА ОТОБРАЖЕНИЯ (БЕЗ ИЗМЕНЕНИЙ В ОТПРАВКЕ) ===
+    // Отображение выбранных
     let pickCountA = 0;
     let pickCountB = 0;
 
