@@ -300,6 +300,24 @@
             console.log("Начинаем опрос статуса комнаты...");
             checkRoomStatus();
         });
+                function getUserUID() {
+            let uid = localStorage.getItem('user_uid');
+            if (!uid) {
+                // Генерируем UUID v4 (простой способ)
+                uid = 'user_' + ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+                ).substring(0, 8);
+                localStorage.setItem('user_uid', uid);
+            }
+            return uid;
+        }
+
+        // Устанавливаем глобально
+        window.USER_UID = getUserUID();
+        console.log('Ваш UID:', window.USER_UID);
+        
+        // Показываем UID пользователю
+        document.getElementById('userInfo').textContent = 'Ваш ID: ' + window.USER_UID;
     </script>
 </body>
 </html>
