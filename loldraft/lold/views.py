@@ -74,21 +74,25 @@ def status(_, room_id):
         })
 def update(_, room_id):
     room = DraftRoom.objects.get(room_id=room_id)
-    bans, _ = BanPhase.objects.get_or_create(room=room)
-    picks, _ = PickPhase.objects.get_or_create(room=room)
-    data = {
-        'time': SimpleRoomTimer.get_time_left(room_id=room_id),
-        'cur_Turn': room.cur_turn,
-        'status': room.status,
-        'red_bans': bans.champions_Red_team,
-        'blue_bans': bans.champions_Blue_team,
-        'red_picks': picks.champions_Red_team,
-        'blue_piks': picks.champions_Blue_team
-    }
-    if len(bans.champions_Blue_team) == 5 and len(bans.champions_Red_team) == 5:
-        room.status = 'pick_phase'
-        room.save()
-    return JsonResponse(data=data)
+    if room.status != 'end':
+        bans, _ = BanPhase.objects.get_or_create(room=room)
+        picks, _ = PickPhase.objects.get_or_create(room=room)
+        cur_Turn = room.blue_captain if room.cur_turn == 'blue'  else room.red_captain
+        data = {
+            'time': SimpleRoomTimer.get_time_left(room_id=room_id),
+            'cur_Turn': cur_Turn,
+            'status': room.status,
+            'red_bans': bans.champions_Red_team,
+            'blue_bans': bans.champions_Blue_team,
+            'red_picks': picks.champions_Red_team,
+            'blue_piks': picks.champions_Blue_team
+        }
+        if len(picks.champions_Blue_team) == 5 and len(picks.champions_Red_team) == 5:
+            room.status = 'end'
+            room.save()
+        return JsonResponse(data=data)
+    else:
+        return JsonResponse(data)
 @require_http_methods(["POST"])
 @csrf_exempt
 def action(request, room_id):
@@ -111,11 +115,14 @@ def action(request, room_id):
     
     if room.turn_index == 0:
         return JsonResponse({"status": 'error'}, status=500)
-    if room.turn_index in (1, 2, 3, 4, 5, 6, 13, 14, 15, 16):
-        room.status = 'ban_phase'
-    if room.turn_index in (7, 8, 9, 10, 11, 12):
-        room.status = 'pick_phase'
-
+    if room.status == 'end':
+        pass
+    else:
+        if room.turn_index in (1, 2, 3, 4, 5, 6, 7, 13, 14, 15, 16, 17):
+            room.status = 'ban_phase'
+        if room.turn_index in (8, 9, 10, 11, 12, 13, 18, 19, 20):
+                room.status = 'pick_phase'
+    
     match (room.turn_index):
         case 1:
             room.cur_turn = 'blue'  # ban
@@ -157,8 +164,7 @@ def action(request, room_id):
             room.cur_turn = 'blue'  # pick
         case 20:
             room.cur_turn = 'red'
-        case 21:
-            room.status = 'end'
+        
     room.save()
     response_data = {"status": room.status}
     if room.status == 'ban_phase':

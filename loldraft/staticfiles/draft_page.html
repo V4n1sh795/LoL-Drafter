@@ -222,6 +222,8 @@
     </div>
 
     <script>
+        let i = 0;
+        localStorage.setItem('i', i);
         // Функция присоединения к стороне
         async function joinSide(side) {
             const userUID = localStorage.getItem("user_uid");
