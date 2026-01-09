@@ -14,7 +14,6 @@ from django.utils import timezone
 from datetime import timedelta
 from .timer2 import SimpleRoomTimer
 
-
 def CreateRoom(request):
     room = DraftRoom.objects.create()
     return redirect('draft_room', room_id=room.room_id)
@@ -29,6 +28,7 @@ def draft_room(request, room_id):
         room.status = 'ban_phase'
         SimpleRoomTimer.start_timer(room_id=room_id, duration_seconds=30.0)
         room.cur_turn = 'blue'
+        room.turn_index = 1
         room.save()
         return render(request, "index_test.html")
     else:
@@ -92,12 +92,13 @@ def update(_, room_id):
 @require_http_methods(["POST"])
 @csrf_exempt
 def action(request, room_id):
+    
     data = json.loads(request.body)
     try:
         room = DraftRoom.objects.get(room_id=room_id)
     except DraftRoom.DoesNotExist:
         return JsonResponse({"error": "Room not found"}, status=404)
-    
+    room.turn_index += 1
     bans, _ = BanPhase.objects.get_or_create(room=room)
     picks, _ = PickPhase.objects.get_or_create(room=room)
     
@@ -107,16 +108,64 @@ def action(request, room_id):
     if not champName:
         return JsonResponse({"error": "champName is required"}, status=400)
     
-    response_data = {"status": room.status}
     
-    
+    if room.turn_index == 0:
+        return JsonResponse({"status": 'error'}, status=500)
+    if room.turn_index in (1, 2, 3, 4, 5, 6, 13, 14, 15, 16):
+        room.status = 'ban_phase'
+    if room.turn_index in (7, 8, 9, 10, 11, 12):
+        room.status = 'pick_phase'
 
+    match (room.turn_index):
+        case 1:
+            room.cur_turn = 'blue'  # ban
+        case 2:
+            room.cur_turn = 'red'   # ban
+        case 3:
+            room.cur_turn = 'red'   # ban
+        case 4:
+            room.cur_turn = 'blue'  # ban
+        case 5:
+            room.cur_turn = 'blue'  # ban
+        case 6:
+            room.cur_turn = 'red'   # ban
+        case 7:
+            room.cur_turn = 'blue'  # pick
+        case 8:
+            room.cur_turn = 'red'   # pick
+        case 9:
+            room.cur_turn = 'red'   # pick
+        case 10:
+            room.cur_turn = 'blue'  # pick
+        case 11:
+            room.cur_turn = 'blue'  # pick
+        case 12:
+            room.cur_turn = 'red'   # pick
+        case 13:
+            room.cur_turn = 'blue'  # ban
+        case 14:
+            room.cur_turn = 'red'   # ban
+        case 15:
+            room.cur_turn = 'red'   # ban
+        case 16:
+            room.cur_turn = 'blue'  # ban
+        case 17:
+            room.cur_turn = 'red'   # pick
+        case 18:
+            room.cur_turn = 'blue'  # pick
+        case 19:
+            room.cur_turn = 'blue'  # pick
+        case 20:
+            room.cur_turn = 'red'
+        case 21:
+            room.status = 'end'
+    room.save()
+    response_data = {"status": room.status}
     if room.status == 'ban_phase':
         if room.blue_captain == user_uid:
             # Добавляем в синюю команду (более безопасный способ)
             bans.champions_Blue_team = bans.champions_Blue_team or []
             bans.champions_Blue_team.append(champName)
-            room.cur_turn = 'red'
             SimpleRoomTimer.reset_timer(room_id=room_id)
             bans.save()
             room.save()
@@ -125,7 +174,6 @@ def action(request, room_id):
         elif room.red_captain == user_uid:
             bans.champions_Red_team = bans.champions_Red_team or []
             bans.champions_Red_team.append(champName)
-            room.cur_turn = 'blue'
             SimpleRoomTimer.reset_timer(room_id=room_id)
             bans.save()
             room.save()
@@ -140,7 +188,6 @@ def action(request, room_id):
             picks.champions_Blue_team = picks.champions_Blue_team or []
             picks.champions_Blue_team.append(champName)
             picks.save()
-            room.cur_turn = 'red'
             SimpleRoomTimer.reset_timer(room_id=room_id)
             room.save()
             response_data["picks"] = (picks.champions_Blue_team or []) + (picks.champions_Red_team or [])
@@ -149,7 +196,6 @@ def action(request, room_id):
             # ВАЖНО: здесь была ошибка - добавляли в синюю команду вместо красной
             picks.champions_Red_team = picks.champions_Red_team or []
             picks.champions_Red_team.append(champName)
-            room.cur_turn = 'blue'
             SimpleRoomTimer.reset_timer(room_id=room_id)
             picks.save()
             room.save()

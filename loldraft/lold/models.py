@@ -17,6 +17,7 @@ class DraftRoom(models.Model):
     red_captain = models.CharField(max_length=100, blank=True, default='')
     status = models.CharField(max_length=10, blank=True, default='waiting')
     cur_turn = models.CharField(max_length=10, blank=True, default='waiting')
+    turn_index = models.IntegerField(default=0) 
     def __str__(self):
         return f"Комната {self.room_id}"
     
