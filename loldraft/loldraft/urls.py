@@ -25,10 +25,11 @@ urlpatterns = [
     path('', views.main_page),
     path('room/<str:room_id>/', views.draft_room, name='draft_room'),
     path('room/<str:room_id>/join/', views.join_side, name='join_side'),
+    path('allchampions/', views.get_champs),
     # path('room/<str:room_id>/draft/', views.handle_draft_action, name='perform_action'),
     path('room/<str:room_id>/status/', views.status, name='room_status'),
     path('room/<str:room_id>/update/', views.update),
-    path('room/<str:room_id>/action/', views.action)
+    path('room/<str:room_id>/action/', views.action),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

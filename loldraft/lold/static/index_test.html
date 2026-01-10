@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -125,23 +127,35 @@
 
     .ban-cell {
       width: 70px;
-      height: 70px;
-      border: 3px solid #444;
-      border-radius: 12px;
+      height: 100px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      background: rgba(40, 40, 50, 0.8);
-      font-weight: bold;
-      font-size: 11px;
-      text-align: center;
-      padding: 8px;
-      color: #fff;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-      transition: all 0.2s ease;
+      justify-content: flex-start;
+      gap: 4px;
+      padding: 5px 0;
     }
 
-    .blue-team .ban-cell {
+    .ban-cell img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .ban-cell .champion-name {
+      font-size: 10px;
+      color: #fff;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 65px;
+      font-weight: bold;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* .blue-team .ban-cell {
       border-color: #4facfe;
       background: rgba(79, 175, 255, 0.15);
     }
@@ -149,7 +163,7 @@
     .red-team .ban-cell {
       border-color: #ff6b6b;
       background: rgba(255, 107, 107, 0.15);
-    }
+    } */
 
     .main-game-area {
       display: flex;
@@ -168,21 +182,34 @@
 
     .pick-cell {
       width: 90px;
-      height: 90px;
-      border: 3px solid #444;
-      border-radius: 12px;
+      height: 120px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      background: rgba(40, 40, 50, 0.8);
-      font-weight: bold;
-      font-size: 12px;
-      text-align: center;
-      padding: 8px;
-      color: #fff;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-      transition: all 0.2s ease;
+      justify-content: flex-start;
+      gap: 5px;
+      padding: 5px 0;
     }
+
+    .pick-cell img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .pick-cell .champion-name {
+      font-size: 11px;
+      color: #e0e0e0;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 85px;
+      font-weight: bold;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
 
     .blue-picks-column .pick-cell {
       border-color: #4facfe;
@@ -243,38 +270,87 @@
       overflow-y: auto;
     }
 
+
     .champion-cell {
       width: 90px;
-      height: 90px;
-      border: 3px solid #555;
+      height: 120px; /* Увеличили высоту для текста */
+      border: 3px solid #444;
       border-radius: 12px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      background: rgba(50, 50, 60, 0.9);
+      justify-content: flex-start;
+      background: rgba(40, 40, 50, 0.8);
       cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+      margin: 0;
+      gap: 5px;
+    }
+
+    .champion-cell img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      transition: transform 0.2s ease;
+      margin-top: 5px;
+    }
+
+    .champion-cell .champion-name {
       font-size: 12px;
-      text-align: center;
-      padding: 8px;
       color: #e0e0e0;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 80px;
+      font-weight: bold;
+      margin: 0 5px 5px;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     .champion-cell:hover {
-      transform: translateY(-3px);
+      transform: scale(1.05);
       border-color: #888;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
 
-    .champion-cell.selected {
-      border-color: #00c9ff;
-      background: rgba(0, 201, 255, 0.25);
-      transform: scale(1.1) translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0, 201, 255, 0.4);
-      color: #ffffff;
+    .champion-cell input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      z-index: -1;
     }
+
+    .champion-cell input[type="radio"]:checked + img,
+    .champion-cell input[type="radio"]:checked ~ .champion-name {
+      border: 2px solid #00c9ff;
+      box-shadow: 0 0 15px rgba(0, 201, 255, 0.6);
+    }
+
+    .champion-cell input[type="radio"]:checked {
+      outline: none;
+    }
+
+    /* Для мобильных устройств */
+    @media (max-width: 768px) {
+      .champion-cell {
+        width: 70px;
+        height: 100px;
+      }
+      .champion-cell img {
+        width: 60px;
+        height: 60px;
+        border-radius: 6px;
+      }
+      .champion-cell .champion-name {
+        font-size: 10px;
+        max-width: 60px;
+      }
+    }
+
 
     .buttons-container {
       display: flex;
@@ -397,9 +473,22 @@
       }
       
       .champion-cell {
-        width: 70px;
-        height: 70px;
-        font-size: 10px;
+        flex-direction: column;
+        padding: 5px;
+        gap: 6px;
+      }
+
+      .champion-cell img {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        background: rgba(0,0,0,0.2);
+        border-radius: 8px;
+      }
+
+      .champion-cell input[type="radio"]:checked + img {
+        border: 2px solid #00c9ff;
+        box-shadow: 0 0 10px rgba(0, 201, 255, 0.6);
       }
       
       .role-btn {
@@ -411,6 +500,33 @@
         min-width: auto;
         max-height: 300px;
       }
+    }
+    .search-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    #champion-search {
+      width: 300px;
+      padding: 12px 20px;
+      font-size: 16px;
+      border: 2px solid #444;
+      border-radius: 50px;
+      background: rgba(30, 30, 40, 0.8);
+      color: #e0e0e0;
+      outline: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    #champion-search:focus {
+      border-color: #4facfe;
+      box-shadow: 0 0 15px rgba(79, 175, 255, 0.3);
+    }
+
+    #champion-search::placeholder {
+      color: #888;
     }
   </style>
 </head>
@@ -437,20 +553,22 @@
     </div>
 
     <!-- Role Selector -->
-    <div class="role-selector">
-      <div class="role-btn active" data-role="all">Все</div>
-      <div class="role-btn" data-role="top">Топ</div>
-      <div class="role-btn" data-role="jungle">Лес</div>
-      <div class="role-btn" data-role="mid">Средняя</div>
-      <div class="role-btn" data-role="adc">Бот</div>
-      <div class="role-btn" data-role="support">Поддержка</div>
+    <div class="search-container">
+      <input type="text" id="champion-search" placeholder="Поиск чемпиона..." autocomplete="off">
     </div>
 
     <div class="main-game-area">
       <div class="picks-column blue-picks-column" id="blue-picks"></div>
       
       <div id="champions-container">
-        <!-- Ячейки будут сгенерированы сюда -->
+        {% for item in champion_data %}
+          <label class="champion-cell" data-name="{{ item.name }}">
+            <input type="radio" name="champion" value="{{ item.name }}" style="display:none;">
+            <img src="{{ item.icon_url }}" alt="{{ item.name }}" loading="lazy"
+                onerror="this.style.display='none'; this.nextElementSibling.textContent='{{ item.name }}';">
+            <span class="champion-name">{{ item.name }}</span>
+          </label>
+        {% endfor %}
       </div>
       
       <div class="picks-column red-picks-column" id="red-picks"></div>
@@ -463,32 +581,104 @@
     <div id="result"></div>
   </div>
 
-  <script>
-  // Champions organized by roles
-  const championsByRole = {
-    all: [
-      "Акали", "Атрикс", "Гангрен", "Дариус", "Фио", "Ирелия", "Ясуо", "Ренектон", "Шен", "Орнн",
-      "Кай'са", "Эвелин", "Ноктюрн", "Раммус", "Шафф", "Волибир", "Хекарим", "Зак", "Лилла", "Киндред",
-      "Анивия", "Азир", "Кассиопея", "Люкс", "Мальфит", "Морганана", "Орианна", "Синдра", "Талия", "Виктор",
-      "Афелиос", "Аш", "Кэйтлин", "Джинкс", "Кайса", "Люсин", "Мисс Фортун", "Сивир", "Тристана", "Варус",
-      "Бард", "Браум", "Жанна", "Карма", "Леона", "Лулу", "Нафили", "Пайк", "Сорака", "Талия"
-    ],
-    top: ["Акали", "Атрикс", "Гангрен", "Дариус", "Фио", "Ирелия", "Ясуо", "Ренектон", "Шен", "Орнн"],
-    jungle: ["Кай'са", "Эвелин", "Ноктюрн", "Раммус", "Шафф", "Волибир", "Хекарим", "Зак", "Лилла", "Киндред"],
-    mid: ["Анивия", "Азир", "Кассиопея", "Люкс", "Мальфит", "Морганана", "Орианна", "Синдра", "Талия", "Виктор"],
-    adc: ["Афелиос", "Аш", "Кэйтлин", "Джинкс", "Кайса", "Люсин", "Мисс Фортун", "Сивир", "Тристана", "Варус"],
-    support: ["Бард", "Браум", "Жанна", "Карма", "Леона", "Лулу", "Нафили", "Пайк", "Сорака", "Талия"]
-  };
+ <script>
+  let allChampions = []; // [{name, icon_url}, ...]
+  let selectedChampion = null;
 
+  // === ЗАГРУЗКА ЧЕМПИОНОВ ===
+  async function loadChampions() {
+    try {
+      const response = await fetch('/allchampions/');
+      if (!response.ok) throw new Error('Сервер вернул ошибку');
+      const data = await response.json();
+      allChampions = Array.isArray(data.data) ? data.data : [];
+      console.log("Загружено чемпионов:", allChampions.length);
+      renderChampionList(allChampions);
+    } catch (error) {
+      console.error("Ошибка загрузки чемпионов:", error);
+      document.getElementById("champions-container").innerHTML = 
+        '<p style="color:#ff6b6b; text-align:center;">Не удалось загрузить чемпионов</p>';
+    }
+  }
+
+  // === ОТРИСОВКА СПИСКА ===
+  function renderChampionList(champions) {
+    const container = document.getElementById("champions-container");
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (!champions || champions.length === 0) {
+      container.innerHTML = '<p style="color:#888; text-align:center;">Нет совпадений</p>';
+      return;
+    }
+
+    champions.forEach(champ => {
+      const cell = document.createElement("label");
+      cell.classList.add("champion-cell");
+      cell.title = champ.name;
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "champion";
+      input.value = champ.name;
+      input.style.display = "none";
+
+      const img = document.createElement("img");
+      img.src = champ.icon_url; // ← берём URL из объекта
+      img.alt = champ.name;
+      img.loading = "lazy";
+      img.onerror = () => {
+        img.style.display = 'none';
+        nameSpan.textContent = champ.name;
+      };
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "champion-name";
+      nameSpan.textContent = champ.name;
+
+      cell.appendChild(input);
+      cell.appendChild(img);
+      cell.appendChild(nameSpan);
+      container.appendChild(cell);
+    });
+  }
+
+  // === ВЫБОР ЧЕМПИОНА ===
+  document.addEventListener('change', (e) => {
+    if (e.target.name === 'champion') {
+      selectedChampion = e.target.value;
+    }
+  });
+
+  // === ИНИЦИАЛИЗАЦИЯ ===
+  document.addEventListener("DOMContentLoaded", () => {
+    loadChampions();
+
+    const searchInput = document.getElementById("champion-search");
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        const filtered = query
+          ? allChampions.filter(champ => 
+              typeof champ.name === 'string' && 
+              champ.name.toLowerCase().includes(query)
+            )
+          : allChampions;
+        renderChampionList(filtered);
+      });
+    }
+  });
+
+  // === ОСТАЛЬНОЙ КОД (таймер, отправка и т.д.) ===
   const roomID = window.location.pathname.split('/')[2];
-  const container = document.getElementById("champions-container");
   const timerElement = document.getElementById("timer");
   const currentTurnElement = document.getElementById("current-turn");
   const blueBansElement = document.getElementById("blue-bans");
   const redBansElement = document.getElementById("red-bans");
   const bluePicksElement = document.getElementById("blue-picks");
   const redPicksElement = document.getElementById("red-picks");
-  let selectedCell = null;
+  
   let timeLeft = 30;
   let timerInterval = null;
   let currentTurn = null;
@@ -497,43 +687,6 @@
   let redBans = [];
   let bluePicks = [];
   let redPicks = [];
-  let currentRole = 'all';
-
-  // Function to render champions based on selected role
-  function renderChampions(role = 'all') {
-    container.innerHTML = '';
-    const champions = championsByRole[role] || championsByRole.all;
-    
-    champions.forEach(name => {
-      const cell = document.createElement("div");
-      cell.classList.add("champion-cell");
-      cell.textContent = name;
-      cell.addEventListener("click", () => {
-        if (selectedCell) selectedCell.classList.remove("selected");
-        cell.classList.add("selected");
-        selectedCell = cell;
-      });
-      container.appendChild(cell);
-    });
-  }
-
-  // Initial render
-  renderChampions();
-
-  // Role button functionality
-  document.querySelectorAll('.role-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      currentRole = this.dataset.role;
-      renderChampions(currentRole);
-      // Clear selection when changing roles
-      if (selectedCell) {
-        selectedCell.classList.remove("selected");
-        selectedCell = null;
-      }
-    });
-  });
 
   function getCookie(name) {
     let cookieValue = null;
@@ -558,14 +711,12 @@
         return;
       }
 
-      // 🔒 Проверка: не забанен ли и не выбран ли уже
       const allUsedChampions = [...blueBans, ...redBans, ...bluePicks, ...redPicks];
       if (allUsedChampions.includes(champName)) {
         document.getElementById("result").textContent = "Этот чемпион уже забанен или выбран!";
         return;
       }
 
-      // Проверяем, что текущий пользователь действительно должен делать ход
       if (currentTurn !== userUID) {
         document.getElementById("result").textContent = "Не ваш ход!";
         return;
@@ -584,64 +735,101 @@
       });
       const data = await response.json();
       console.log("SendChoice response:", data);
-      // Можно обновить UI на основе ответа, если нужно
+      
+      selectedChampion = null;
+      document.querySelectorAll('input[name="champion"]').forEach(r => r.checked = false);
     } catch (error) {
       console.error("Ошибка отправки выбора:", error);
       document.getElementById("result").textContent = "Ошибка при отправке!";
     }
   }
 
-  // Функция для отображения банов (горизонтально)
   function renderBans(bansList, containerElement) {
     containerElement.innerHTML = '';
     if (bansList && bansList.length > 0) {
       bansList.forEach(ban => {
         const banCell = document.createElement("div");
         banCell.classList.add("ban-cell");
-        banCell.textContent = ban;
+
+        const img = document.createElement("img");
+        // Для банов генерируем URL сами (так как получаем только имя)
+        img.src = `/static/icons/${encodeURIComponent(ban)}.png`;
+        img.alt = ban;
+        img.loading = "lazy";
+        img.style.width = "100%";
+        img.style.height = "auto";
+        img.style.borderRadius = "8px";
+        img.style.objectFit = "cover";
+        img.onerror = () => {
+          img.style.display = 'none';
+          nameSpan.textContent = ban;
+        };
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "champion-name";
+        nameSpan.textContent = ban;
+
+        banCell.appendChild(img);
+        banCell.appendChild(nameSpan);
         containerElement.appendChild(banCell);
       });
     }
   }
 
-  // Функция для отображения пиков (вертикально по краям)
   function renderPicks(picksList, containerElement) {
     containerElement.innerHTML = '';
     if (picksList && picksList.length > 0) {
       picksList.forEach(pick => {
         const pickCell = document.createElement("div");
         pickCell.classList.add("pick-cell");
-        pickCell.textContent = pick;
+
+        const img = document.createElement("img");
+        img.src = `/static/icons/${encodeURIComponent(pick)}.png`;
+        img.alt = pick;
+        img.loading = "lazy";
+        img.style.width = "100%";
+        img.style.height = "auto";
+        img.style.borderRadius = "8px";
+        img.style.objectFit = "cover";
+        img.onerror = () => {
+          img.style.display = 'none';
+          nameSpan.textContent = pick;
+        };
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "champion-name";
+        nameSpan.textContent = pick;
+
+        pickCell.appendChild(img);
+        pickCell.appendChild(nameSpan);
         containerElement.appendChild(pickCell);
       });
     }
   }
 
-  // 🔁 Функция для постоянного опроса обновлений
-  let updateInterval; // Объявляем переменную ДО использования
-
+  let updateInterval;
   async function pollUpdates() {
     try {
       const response = await fetch(`/room/${roomID}/update/`);
       if (!response.ok) {
-        let savedI = localStorage.getItem('i');
-        console.warn("Не удалось получить обновления:", response.status);
-        
-        if (i > 5) { clearInterval(updateInterval); localStorage.setItem('i', 0);}
-        i++;
-        localStorage.setItem('i', i);
+        let i = parseInt(localStorage.getItem('i') || '0');
+        if (i > 5) {
+          clearInterval(updateInterval);
+          localStorage.setItem('i', '0');
+        } else {
+          i++;
+          localStorage.setItem('i', String(i));
+        }
         return;
       }
       const data = await response.json();
       console.log("Обновление от сервера:", data);
 
-      // Обновляем таймер
       updateTimer(data.time);
-
-      // Обновляем текущий ход
       currentTurn = data.cur_Turn;
       gameStatus = data.status;
       const userUID = localStorage.getItem('user_uid');
+      
       if (currentTurn === userUID) {
         currentTurnElement.textContent = "Ваш ход!";
         currentTurnElement.className = "your-turn";
@@ -649,19 +837,19 @@
         currentTurnElement.textContent = `Ход игрока: ${currentTurn || 'ожидание...'}`;
         currentTurnElement.className = "";
       }
+
       blueBans = data.blue_bans || [];
       redBans = data.red_bans || [];
       bluePicks = data.blue_piks || [];
       redPicks = data.red_picks || [];
-      // Обновляем баны и пики
-      renderBans(data.blue_bans, blueBansElement);
-      renderBans(data.red_bans, redBansElement);
-      renderPicks(data.blue_piks, bluePicksElement);
-      renderPicks(data.red_picks, redPicksElement);
 
-      // Если игра завершена — останавливаем опрос
-      if (gameStatus == 'end') {
-        clearInterval(updateInterval); // Теперь updateInterval доступен
+      renderBans(blueBans, blueBansElement);
+      renderBans(redBans, redBansElement);
+      renderPicks(bluePicks, bluePicksElement);
+      renderPicks(redPicks, redPicksElement);
+
+      if (gameStatus === 'end') {
+        clearInterval(updateInterval);
       }
     } catch (error) {
       console.error("Ошибка при опросе обновлений:", error);
@@ -669,10 +857,8 @@
     }
   }
 
-  // Запускаем опрос каждые 500 мс
   updateInterval = setInterval(pollUpdates, 500);
 
-  // Таймер выбора чемпиона
   function updateTimer(seconds) {
     if (seconds <= 0) {
       timerElement.textContent = "Время вышло!";
@@ -684,8 +870,7 @@
     }
   }
 
-  // Подтверждение выбора
-  document.getElementById("confirm-btn").addEventListener("click", () => {
+  document.getElementById("confirm-btn")?.addEventListener("click", () => {
     const resultDiv = document.getElementById("result");
     const userUID = localStorage.getItem('user_uid');
     
@@ -694,21 +879,19 @@
       return;
     }
     
-    if (selectedCell) {
-      // Проверяем, что текущий пользователь должен делать ход
-      if (currentTurn !== userUID) {
-        resultDiv.textContent = "Не ваш ход!";
-        return;
-      }
-      
-      resultDiv.textContent = `Выбран чемпион: ${selectedCell.textContent}`;
-      SendChoice(selectedCell.textContent);
-      // Не останавливаем таймер, так как он управляется сервером
-    } else {
+    if (!selectedChampion) {
       resultDiv.textContent = "Сначала выберите чемпиона!";
+      return;
     }
+
+    if (currentTurn !== userUID) {
+      resultDiv.textContent = "Не ваш ход!";
+      return;
+    }
+
+    resultDiv.textContent = `Выбран чемпион: ${selectedChampion}`;
+    SendChoice(selectedChampion);
   });
-  </script>
-</body>
+</script>
 </html>
 

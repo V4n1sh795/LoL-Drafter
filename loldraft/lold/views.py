@@ -13,7 +13,36 @@ import time
 from django.utils import timezone
 from datetime import timedelta
 from .timer2 import SimpleRoomTimer
+from .forms import ChampionSelectForm
+def champ_data():
+    icons_dir = os.path.join(settings.BASE_DIR, 'static', 'icons')
+    champion_data = []
 
+    if os.path.exists(icons_dir):
+        for filename in os.listdir(icons_dir):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.svg')):
+                name = os.path.splitext(filename)[0]
+                icon_url = static(f'icons/{filename}')
+                champion_data.append({'name': name, 'icon_url': icon_url})
+        champion_data.sort(key=lambda x: x['name'])
+    return champion_data
+
+def get_champs(request):
+    icons_dir = os.path.join(settings.STATIC_ROOT or settings.BASE_DIR, 'icons')
+    champions = []
+    
+    if os.path.exists(icons_dir):
+        for filename in os.listdir(icons_dir):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.svg')):
+                name = os.path.splitext(filename)[0]
+                icon_url = f"/static/icons/" + filename
+                champions.append({
+                    'name': name,
+                    'icon_url': icon_url
+                })
+        champions.sort(key=lambda x: x['name'])
+    print(champions)
+    return JsonResponse({'data': champions})  # ← список объектов
 def CreateRoom(request):
     room = DraftRoom.objects.create()
     return redirect('draft_room', room_id=room.room_id)
@@ -30,7 +59,14 @@ def draft_room(request, room_id):
         room.cur_turn = 'blue'
         room.turn_index = 1
         room.save()
-        return render(request, "index_test.html")
+        champion_data = champ_data()
+        
+        form = ChampionSelectForm(champion_data)
+        return render(request, 'index_test.html', {
+        'form': form,
+        'champion_data': champion_data,  # ← передаём отдельно для шаблона
+        'room_id': room_id,
+    })
     else:
         print("NotApproved")
         return render(request, 'draft_page.html')
@@ -129,9 +165,9 @@ def action(request, room_id):
         case 2:
             room.cur_turn = 'red'   # ban
         case 3:
-            room.cur_turn = 'red'   # ban
+            room.cur_turn = 'blue'   # ban
         case 4:
-            room.cur_turn = 'blue'  # ban
+            room.cur_turn = 'red'   # ban
         case 5:
             room.cur_turn = 'blue'  # ban
         case 6:
@@ -153,9 +189,9 @@ def action(request, room_id):
         case 14:
             room.cur_turn = 'red'   # ban
         case 15:
-            room.cur_turn = 'red'   # ban
-        case 16:
             room.cur_turn = 'blue'  # ban
+        case 16:
+            room.cur_turn = 'red'   # ban
         case 17:
             room.cur_turn = 'red'   # pick
         case 18:
@@ -163,7 +199,7 @@ def action(request, room_id):
         case 19:
             room.cur_turn = 'blue'  # pick
         case 20:
-            room.cur_turn = 'red'
+            room.cur_turn = 'red'   # pick
         
     room.save()
     response_data = {"status": room.status}
@@ -213,5 +249,3 @@ def action(request, room_id):
     
     else:
         return JsonResponse({"status": room.status, "message": "Room is not in active phase"})
-
-
