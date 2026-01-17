@@ -110,25 +110,23 @@ def status(_, room_id):
         })
 def update(_, room_id):
     room = DraftRoom.objects.get(room_id=room_id)
-    if room.status != 'end':
-        bans, _ = BanPhase.objects.get_or_create(room=room)
-        picks, _ = PickPhase.objects.get_or_create(room=room)
-        cur_Turn = room.blue_captain if room.cur_turn == 'blue'  else room.red_captain
-        data = {
-            'time': SimpleRoomTimer.get_time_left(room_id=room_id),
-            'cur_Turn': cur_Turn,
-            'status': room.status,
-            'red_bans': bans.champions_Red_team,
-            'blue_bans': bans.champions_Blue_team,
-            'red_picks': picks.champions_Red_team,
-            'blue_piks': picks.champions_Blue_team
-        }
-        if len(picks.champions_Blue_team) == 5 and len(picks.champions_Red_team) == 5:
-            room.status = 'end'
-            room.save()
-        return JsonResponse(data=data)
-    else:
-        return JsonResponse(data)
+    bans, _ = BanPhase.objects.get_or_create(room=room)
+    picks, _ = PickPhase.objects.get_or_create(room=room)
+    cur_Turn = room.blue_captain if room.cur_turn == 'blue'  else room.red_captain
+    data = {
+        't_ind': room.turn_index,
+        'time': SimpleRoomTimer.get_time_left(room_id=room_id),
+        'cur_Turn': cur_Turn,
+        'status': room.status,
+        'red_bans': bans.champions_Red_team,
+        'blue_bans': bans.champions_Blue_team,
+        'red_picks': picks.champions_Red_team,
+        'blue_piks': picks.champions_Blue_team
+    }
+    if len(picks.champions_Blue_team) == 5 and len(picks.champions_Red_team) == 5:
+        room.status = 'end'
+        room.save()
+    return JsonResponse(data=data)
 @require_http_methods(["POST"])
 @csrf_exempt
 def action(request, room_id):

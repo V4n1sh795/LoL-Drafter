@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Драфтер LoL - LOL-DRAFTER</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            margin-bottom: 60px;
+            animation: pulse 3s infinite;
+        }
+
+        .logo h1 {
+            color: #ffffff;
+            font-size: 4rem;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+            font-weight: 800;
+        }
+
+        .logo p {
+            color: #e2e8f0;
+            font-size: 1.4rem;
+            margin-top: 15px;
+            font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 18px 45px;
+            background: linear-gradient(145deg, #ff6b6b, #ff8e8e);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.6);
+            background: linear-gradient(145deg, #ff5252, #ff7b7b);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .ornament {
+            position: absolute;
+            opacity: 0.15;
+            z-index: 1;
+        }
+
+        .ornament-1 {
+            top: 15%;
+            left: 10%;
+            font-size: 5rem;
+            color: #ff6b6b;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        .ornament-2 {
+            bottom: 20%;
+            right: 12%;
+            font-size: 6rem;
+            color: #4ecdc4;
+            animation: float 10s infinite ease-in-out reverse;
+        }
+
+        .ornament-3 {
+            top: 50%;
+            right: 20%;
+            font-size: 4rem;
+            color: #96ceb4;
+            animation: float 9s infinite ease-in-out;
+        }
+
+        .ornament-4 {
+            bottom: 30%;
+            left: 15%;
+            font-size: 3.5rem;
+            color: #45b7d1;
+            animation: float 7s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-25px) rotate(15deg); }
+        }
+
+        @media (max-width: 600px) {
+            .logo h1 {
+                font-size: 2.8rem;
+            }
+            
+            .logo p {
+                font-size: 1.1rem;
+            }
+            
+            .btn {
+                padding: 15px 35px;
+                font-size: 1.1rem;
+            }
+        }
+
+        .user-info {
+            margin-top: 30px;
+            color: #a0aec0;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="ornament ornament-1">⚡</div>
+    <div class="ornament ornament-2">🎮</div>
+    <div class="ornament ornament-3">🎯</div>
+    <div class="ornament ornament-4">🏆</div>
+
+    <div class="container">
+        <div class="logo">
+            <h1>LOL-DRAFTER</h1>
+            <p>Создайте эпическую комнату для драфта чемпионов</p>
+        </div>
+
+        <a href="/create/" class="btn">Создать комнату</a>
+        
+        <div class="user-info" id="userInfo"></div>
+    </div>
+
+    <script>
+        function getUserUID() {
+            let uid = localStorage.getItem('user_uid');
+            if (!uid) {
+                // Генерируем UUID v4 (простой способ)
+                uid = 'user_' + ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+                ).substring(0, 8);
+                localStorage.setItem('user_uid', uid);
+            }
+            return uid;
+        }
+
+        // Устанавливаем глобально
+        window.USER_UID = getUserUID();
+        console.log('Ваш UID:', window.USER_UID);
+        
+        // Показываем UID пользователю
+        document.getElementById('userInfo').textContent = 'Ваш ID: ' + window.USER_UID;
+    </script>
+</body>
+</html>
+
