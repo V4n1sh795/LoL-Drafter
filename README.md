@@ -39,4 +39,5 @@
     ```bash
     ./run.sh # Linux
     # На Windows просто нажимаем дважды на run.bat 
-
+## Ссылка на деплой
+Рабочая версия проекта https://lol-drafter.onrender.com/
